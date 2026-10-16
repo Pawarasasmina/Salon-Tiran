@@ -1,0 +1,10 @@
+import {Router} from 'express';
+import {z} from 'zod';
+import {Appointment,Service} from './models/index.js';
+import {appointmentEnd,assertBookable,reservingStatuses} from './domain/booking.js';
+const router=Router();
+const booking=z.object({idempotencyKey:z.string().min(12).max(120),serviceId:z.string(),staffId:z.string(),startAt:z.coerce.date(),guest:z.object({name:z.string().min(2).max(100),phone:z.string().min(7).max(30),email:z.string().email().optional().or(z.literal(''))}),notes:z.string().max(1000).optional()});
+router.get('/health',(_req,res)=>res.json({ok:true,service:'salon-api'}));
+router.get('/services',async(_req,res,next)=>{try{res.json({data:await Service.find({active:true}).sort({displayOrder:1}).lean()})}catch(e){next(e)}});
+router.post('/appointments',async(req,res,next)=>{try{const input=booking.parse(req.body);const existing=await Appointment.findOne({idempotencyKey:input.idempotencyKey});if(existing)return res.status(200).json({data:existing,idempotent:true});const service=await Service.findById(input.serviceId).lean();if(!service)return res.status(404).json({error:{code:'SERVICE_NOT_FOUND',message:'Service not found'}});const endAt=appointmentEnd(input.startAt,service.durationMinutes,service.bufferMinutes);assertBookable(input.startAt,endAt);const conflict=await Appointment.exists({staffId:input.staffId,status:{$in:reservingStatuses},startAt:{$lt:endAt},endAt:{$gt:input.startAt}});if(conflict)return res.status(409).json({error:{code:'SLOT_UNAVAILABLE',message:'That time has just become unavailable.'}});const item=await Appointment.create({...input,endAt,bookingReference:`STW-${Date.now().toString(36).toUpperCase()}`,serviceSnapshot:{serviceId:service._id,name:service.name,price:service.price,durationMinutes:service.durationMinutes,bufferMinutes:service.bufferMinutes},statusHistory:[{status:'pending'}]});return res.status(201).json({data:item})}catch(e){next(e)}});
+export default router;
