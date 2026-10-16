@@ -4,6 +4,12 @@
   "workspaces": ["client", "server"],
   "scripts": {
     "dev": "concurrently -n WEB,API -c cyan,green \"npm run dev -w client\" \"npm run dev -w server\"",
+    "dev:frontend": "npm run dev -w client",
+    "dev:backend": "npm run dev -w server",
+    "build:frontend": "npm run build -w client",
+    "build:backend": "npm run build -w server",
+    "start:frontend": "npm run start -w client",
+    "start:backend": "npm run start -w server",
     "build": "npm run build -w client && npm run build -w server",
     "test": "npm run test -w server",
     "typecheck": "npm run typecheck -w client && npm run typecheck -w server"

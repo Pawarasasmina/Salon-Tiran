@@ -8,10 +8,41 @@ A production-oriented MERN monorepo for a premium unisex salon: editorial public
 
 1. Copy `.env.example` to `.env` and configure MongoDB.
 2. Run `npm install`.
-3. Run `npm run dev`.
+3. Run both applications with `npm run dev`, or run them independently:
+
+   - Frontend: `npm run dev:frontend`
+   - Backend: `npm run dev:backend`
 4. Open `http://localhost:5173`; the API runs at `http://localhost:4000`.
 
-The frontend also works in demo mode if the API or MongoDB is not available. Booking submissions remain local previews in that mode and are never falsely reported as confirmed.
+The frontend and backend are independently deployable. Dashboard database actions require the API and MongoDB to be available.
+
+## Deploy frontend and backend separately
+
+### Frontend host
+
+- Project/root directory: `client`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variable: `VITE_API_URL=https://api.your-domain.com`
+
+`VITE_API_URL` is compiled into the frontend during its build, so set it before building. Do not include a trailing slash.
+
+### Backend host
+
+- Project/root directory: `server`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Start command: `npm start`
+- Required variables: `MONGODB_URI`, `SESSION_SECRET`, and `CLIENT_URLS`
+
+Set `CLIENT_URLS` to the exact frontend origin. Multiple origins may be comma-separated:
+
+```env
+CLIENT_URLS=https://salon.example.com,https://www.salon.example.com
+```
+
+The backend exposes its routes under `/api`; for example, `https://api.your-domain.com/api/health`.
 
 ## Architecture
 
