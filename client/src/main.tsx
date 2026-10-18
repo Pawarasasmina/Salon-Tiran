@@ -8,5 +8,5 @@ import './styles.css';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><QueryClientProvider client={queryClient}><BrowserRouter><App /><Toaster position="bottom-right" richColors /></BrowserRouter></QueryClientProvider></React.StrictMode>
+  <QueryClientProvider client={queryClient}><BrowserRouter><App /><Toaster position="bottom-right" richColors /></BrowserRouter></QueryClientProvider>
 );
